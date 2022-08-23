@@ -7,7 +7,8 @@ exports.readWishlistModel = async(id) => {
     try{
         const wishlist = await prisma.wishlist.findMany({
             where:{
-                user_id: id
+                user_id: id,
+                is_favorite: false
             }
         });
         result.data = wishlist

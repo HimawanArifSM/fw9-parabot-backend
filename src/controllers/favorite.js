@@ -9,7 +9,7 @@ exports.createWFavorite = async(req,res)=>{
         return errorResponse(wishlist.error,res);
     }
     if(wishlist.data){
-        return response(res,'wishlist created',wishlist.data);
+        return response(res,'favorite created',wishlist.data);
     }
 };
 
@@ -20,7 +20,7 @@ exports.readFavorite = async(req,res)=>{
         return errorResponse(wishlist.error,res);
     }
     if(wishlist.data){
-        return response(res,'Showing wishlist',wishlist.data);
+        return response(res,'Showing favorite',wishlist.data);
     }
 }
 
@@ -31,7 +31,7 @@ exports.updateFavorite=(req, res)=>{
         return errorResponse(err,res);
       }
       else{
-        return response(res, 'Create user succesfully');
+        return response(res, 'Update favorite succesfully');
       }
     });
 };
@@ -43,6 +43,6 @@ exports.deleteFavorite = async(req,res)=>{
         return errorResponse(wishlist.error,res);
     }
     if(wishlist.data){
-        return response(res,'Showing wishlist',wishlist.data);
+        return response(res,'Delete favorite successd');
     }
 }
