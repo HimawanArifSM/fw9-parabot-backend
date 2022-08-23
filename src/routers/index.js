@@ -16,8 +16,8 @@ router.use("/checkouts", require("./checkouts"));
 router.use('/',require('./notification'));
 
 //dari himawan
-router.use('/favorite', require('./favorite'));
-router.use('/wishlist', require('./wishlist'));
+router.use('/', require('./favorite'));
+router.use('/', require('./wishlist'));
 
 //dari master??
 router.use('/', require('./product'));
