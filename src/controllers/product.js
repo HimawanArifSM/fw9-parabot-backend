@@ -5,9 +5,10 @@ const {LIMIT_DATA} = process.env;
 
 exports.getAllProduct = async (req, res) => {
     const {searchBy='product_name',search='',sortBy='created_at',sort='asc',limit=12, page=1}=req.query;
-    const offset = (page-1) * limit;
+    const offset = (page-1) * parseInt(limit);
+    console.log(parseInt(offset, 10));
     try {
-        const products = await productModel.getAllProducts(searchBy,search,sortBy,sort,limit,offset);
+        const products = await productModel.getAllProducts(searchBy,search,sortBy,sort,limit,parseInt(offset, 10));
         const pageInfo = {};
         productModel.countAllProductsModel(searchBy,search,(err,totalusers)=>{
             pageInfo.totalData = totalusers;
