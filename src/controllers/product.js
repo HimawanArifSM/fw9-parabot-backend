@@ -107,13 +107,19 @@ exports.updateProduct = async (req, res) => {
         } else {
             req.body.is_archive = false;
         }
-        req.body.price = parseInt(req.body.price, 10);
-        req.body.stock = parseInt(req.body.stock, 10);
-        req.body.discount = parseFloat(req.body.discount/100);
+        if(req.body.price){
+            req.body.price = parseInt(req.body.price, 10);
+        }
+        if(req.body.stock){
+            req.body.stock = parseInt(req.body.stock, 10);
+        }
+        if(req.body.discount){
+            req.body.discount = parseFloat(req.body.discount/100);
+        }
         const product = await productModel.updateProduct(idProduct, req.body);
         return response(res, 'success for update product.', product);
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         return errorResponse(error, res);
     }
 }
