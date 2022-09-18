@@ -99,9 +99,7 @@ exports.updateProduct = async (id, data) => {
         where: {
             id: id
         },
-        data: {
-            ...data
-        }
+        data,
     })
     return product;
 }
