@@ -24,6 +24,32 @@ exports.getAllProduct = async (req, res) => {
     }
 }
 
+exports.getProducts = (req, res) => {
+    const {search = '', sort = 'created_at',sortBy = 'DESC', limit=parseInt(LIMIT_DATA), page=1, category = '', color = '', brand = ''} = req.query;
+    const offset = (page - 1) * limit;
+    productModel.getProducts(search, sort, sortBy, limit, offset, category, color, brand, (results) => {
+        if (results.length < 1) {
+            return res.redirect('/404');
+        }
+        const pageInfo = {};
+    
+        productModel.getProductsCount(search, category, color, brand, (err, totalData)=>{
+        pageInfo.totalData = totalData;
+        pageInfo.totalPage = Math.ceil(totalData/limit);
+        pageInfo.currentPage = parseInt(page, 10);
+        pageInfo.nextPage = pageInfo.currentPage < pageInfo.totalPage ? pageInfo.currentPage + 1 : null;
+        pageInfo.prevPage = pageInfo.currentPage > 1 ? pageInfo - 1 : null;
+        return response(res, 'List all products search', results, pageInfo);
+        });
+    })
+}
+
+exports.getProductCategoryCount = (req, res) => {
+    productModel.countEveryCategory((err, results) => {
+        return response(res, 'list count every category', results)
+    })
+}
+
 exports.getAllProductsUser = async (req, res) => {
     const idUser = req.authUser.id;
     const {limit=10, page=1}=req.query;

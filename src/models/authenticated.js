@@ -49,3 +49,39 @@ exports.updateEmail = (id, email, cb) => {
     }
   });
 }
+
+// cart
+exports.checkCart = (product_id, user_id, cb) => {
+  db.query(`SELECT * FROM cart WHERE user_id = ${user_id} AND product_id = ${product_id} AND is_paid = false`, (err, res) => {
+    cb(err, res.rows)
+  })
+}
+
+exports.createCart = (user_id, product_id, quantity, total_price, cb) => {
+  const q = 'INSERT INTO cart (user_id, product_id, quantity, total_price) VALUES ($1, $2, $3, $4) RETURNING *'
+  const val = [user_id, product_id, quantity, total_price]
+  db.query(q, val, (err, res) => {
+    cb(err, res)
+  })
+}
+
+exports.qtyAddCart = (id, quantity, cb) => {
+  db.query(`UPDATE cart SET quantity = quantity + ${quantity} WHERE id = ${id} RETURNING *`, (err, res) => {
+    if (err) {
+      cb(err)
+    } else {
+      cb(err, res.rows)
+    }
+  })
+}
+
+exports.qtyMinCart = (id, quantity, cb) => {
+  db.query(`UPDATE cart SET quantity = quantity - ${quantity} WHERE id = ${id} RETURNING *`, (err, res) => {
+    if (err) {
+      cb(err)
+    } else {
+      cb(err, res.rows)
+    }
+  })
+}
+// cart

@@ -1,5 +1,6 @@
 const prisma = require("../helpers/prisma")
 const db = require('../helpers/db');
+const {LIMIT_DATA} = process.env;
 
 
 exports.getAllProducts = async (searchBy,search,sortBy,sort,limit,offset) => {
@@ -114,3 +115,23 @@ exports.deleteProduct = async (id) => {
     });
     return product;
 }
+
+// get all products
+exports.getProducts = (search, sort, sortBy, limit=parseInt(LIMIT_DATA), offset=0, category, color, brand, cb) => {
+    db.query(`SELECT products.id, product_name, price, product_images, categories.category_name FROM products FULL OUTER JOIN categories ON categories.id = products.category_id WHERE (product_name ILIKE '%${search}%') AND is_archive = false AND categories.category_name ILIKE '%${category}%' AND products.color ILIKE '%${color}%' AND products.brand ILIKE '%${brand}%' ORDER BY products.${sort} ${sortBy} LIMIT $1 OFFSET $2`, [limit, offset], (err, res) => {
+        cb(res.rows);
+    })
+}
+
+exports.getProductsCount = (search, category, color, brand, cb) => {
+    db.query(`SELECT * FROM products FULL OUTER JOIN categories ON categories.id = products.category_id WHERE (product_name ILIKE '%${search}%') AND is_archive = false AND categories.category_name ILIKE '%${category}%' AND products.color ILIKE '%${color}%' AND products.brand ILIKE '%${brand}%'`, (err, res) => {
+        cb(err, res.rowCount)
+    })
+}
+
+exports.countEveryCategory = (cb) => {
+    db.query('SELECT categories.category_name, COUNT (categories.category_name) FROM products FULL OUTER JOIN categories ON categories.id = products.category_id WHERE is_archive = false GROUP BY categories.category_name', (err, res) => {
+        cb(err, res.rows)
+    })
+}
+// get all products
