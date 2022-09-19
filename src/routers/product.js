@@ -11,4 +11,8 @@ product.post('/products', authMiddleware, uploudMiddleware, productController.cr
 product.patch('/products/:id', authMiddleware, productController.updateProduct);
 product.delete('/products/:id', authMiddleware, productController.deleteProduct);
 
+// get all product
+product.get('/products-all', productController.getProducts)
+product.get('/products-category', productController.getProductCategoryCount)
+
 module.exports = product;
