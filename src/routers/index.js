@@ -28,6 +28,7 @@ router.use('/', require('./cart'));
 
 // authenticated seller
 router.use('/authenticated-seller', require('./authenticatedSeller'));
+router.use('/authenticated-costumer', require('./authenticatedCustomer'));
 
 module.exports=router
 
