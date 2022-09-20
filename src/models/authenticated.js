@@ -34,7 +34,7 @@ exports.updateProfile = (user_id, full_name, gender, image, store_name, store_de
   const finalResult = key.map((o, ind)=> `${o}=$${ind+2}`);
   const q = `UPDATE profiles SET ${finalResult} WHERE user_id=$1 RETURNING full_name, gender, image, store_name, store_desc, phone_num, bio`
   db.query(q, val, (err, res)=>{
-    cb(err, res.rows);
+    cb(err, res);
   });
 }
 

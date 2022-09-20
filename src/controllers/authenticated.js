@@ -27,7 +27,10 @@ exports.updateProfileSeller = (req, res) => {
         if (err) {
             return errorResponse(res, `Failed to update: ${err.message}`, null, null, 400);
         }
-        return response(res, 'Profile updated', results[0]);
+        if (results.rowCount<1){
+            return response(res, 'User not Found', null, null, 400)
+        }
+        return response(res, 'Profile updated', results.rows[0]);
     })
 }
 
