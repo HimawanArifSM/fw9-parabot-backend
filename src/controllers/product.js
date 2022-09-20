@@ -75,10 +75,10 @@ exports.getAllProductsUser = async (req, res) => {
 }
 
 exports.getProductById = async (req, res) => {
-    // console.log(req.params)
+    const idUser = req.authUser.id;
     const idProduct = req.params.id;
     try {
-        const product = await productModel.getProductById(parseInt(idProduct, 10));
+        const product = await productModel.getProductById(parseInt(idProduct, 10), parseInt(idUser, 10));
         if(product.length < 1) {
             return response(res, 'Product not found !!!', null);
         } else {
