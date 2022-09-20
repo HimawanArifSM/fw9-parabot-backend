@@ -19,8 +19,8 @@ exports.updateProfileSeller = (req, res) => {
     let filename = null;
     const {full_name, gender, store_name, store_desc, phone_num, bio} = req.body;
 
-    if(req.file){
-        filename = req.file.path;
+    if(req.files){
+        filename = req.files[0].path
     }
 
     authenticatedModel.updateProfile(user_id, full_name, gender, filename, store_name, store_desc, phone_num, bio, (err, results) => {
