@@ -75,9 +75,25 @@ exports.getProductById = async (id, user_id) => {
                     }
                 },
                 select: {
+                    id: true,
                     is_favorite: true,
                 }
             },
+            cart: true
+        }
+    });
+    return product;
+}
+
+exports.getProductByIdPublic = async (id) => {
+    const product = await prisma.products.findMany({
+        where: {
+            id: id
+        },
+        include: {
+            categories: true,
+            reviews: true,
+            wishlist: true,
             cart: true
         }
     });

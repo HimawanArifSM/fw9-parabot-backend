@@ -89,6 +89,20 @@ exports.getProductById = async (req, res) => {
     }
 }
 
+exports.getProductByIdPublic = async (req, res) => {
+    const idProduct = req.params.id;
+    try {
+        const product = await productModel.getProductByIdPublic(parseInt(idProduct, 10));
+        if(product.length < 1) {
+            return response(res, 'Product not found !!!', null);
+        } else {
+            return response(res, 'Success get product datas', product);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 exports.createProduct = async (req, res) => {
     const idUser = req.authUser.id;
     req.body.price = parseInt(req.body.price, 10);
