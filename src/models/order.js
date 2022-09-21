@@ -6,7 +6,6 @@ const convertMoney = (number) => new Intl.NumberFormat('Id-ID', {
 }).format(number)
 
 exports.createOrder = async (data) => {
-    console.log(data)
     const getCart = await prisma.cart.findMany({
         where: {
             id: parseInt(data.cart_id, 10)
@@ -30,6 +29,7 @@ exports.createOrder = async (data) => {
             id: product_id
         }
     });
+    const seller_id = getProduct[0].user_id;
     if (getProduct.length < 1){
         return 'error get product and order';
     } else {
@@ -44,26 +44,47 @@ exports.createOrder = async (data) => {
         })
     }
 
+    //notification for customers
     await prisma.notification.create({
         data:{
             tittle: 'You have new order',
-            text: `You order ${getProduct[0].product_name} with price ${convertMoney(parseInt(getCart[0].total_price, 10))}.`,
+            text: `You order product ${getProduct[0].product_name} with price ${convertMoney(parseInt(getCart[0].total_price, 10))}.`,
             user_id: data.user_id,
         }
-    })
+    });
+
+    //notification for seller
+    await prisma.notification.create({
+        data:{
+            tittle: 'You have new order',
+            text: `You have an order for ${getProduct[0].product_name} products.`,
+            user_id: parseInt(seller_id, 10),
+        }
+    });
 
     const order = await prisma.orders.create({
         data: {
             cart_id: parseInt(data.cart_id, 10),
             checkout_id: parseInt(data.checkout_id, 10),
-            status_payment: 'paid'
+            status_payment: 'paid',
+            custumer_id: data.user_id,
+            seller_id: parseInt(seller_id, 10),
+        },
+    });
+
+    const finalOrder = await prisma.orders.update({
+        where: {
+            id: order.id,
+        },
+        data: {
+            transaction_id: Math.floor(Math.random(10) * 1000000000000000)+`${product_id}${order.id}OFRNFS`
         }
     });
 
-    return order;
+    return finalOrder;
 }
 
-exports.getOrderForSeller = async (type) => {
+exports.getAllOrder = async (type, seller_id, custumer_id, limit, offset) => {
     const includeData = {
         include: {
             cart: {
@@ -81,54 +102,276 @@ exports.getOrderForSeller = async (type) => {
             }
         }
     }
+    
+    let isSeller;
+
+    if(type === 'all' && seller_id!=null) {
+        isSeller = {seller_id: seller_id}
+    } else if(type === 'all' && seller_id==null) {
+        isSeller = {custumer_id: custumer_id}
+    } else if(type !== 'all' && seller_id!=null){
+        isSeller = { 
+            AND: {
+                seller_id: seller_id
+            }
+        }
+    } else if(type !== 'all' && seller_id==null) {
+        isSeller = { 
+            AND: {
+                custumer_id: custumer_id
+            }
+        }
+    }
+
     const getOrder = await prisma.orders.findMany();
-    console.log(getOrder)
+    // console.log(getOrder)
     // const getProduct = await prisma.cart.findMany()
     switch (type) {
         case 'paid':
             const orderPaid = await prisma.orders.findMany({
+                skip: offset,
+                take: limit,
                 where: {
-                    status_payment: 'paid'
+                    status_payment: 'paid',
+                    ...isSeller
                 },
                 ...includeData
             });
             return orderPaid;
-        case 'pending':
-            const orderPending = await prisma.orders.findMany({
+        case 'process':
+            const orderProcess = await prisma.orders.findMany({
+                skip: offset,
+                take: limit,
                 where: {
-                    status_payment: 'pending'
+                    status_payment: 'process',
+                    ...isSeller
                 },
                 ...includeData
             });
-            return orderPending;
+            return orderProcess;
         case 'sent':
             const orderSent = await prisma.orders.findMany({
+                skip: offset,
+                take: limit,
                 where: {
-                    status_payment: 'sent'
+                    status_payment: 'sent',
+                    ...isSeller
                 },
                 ...includeData
             });
             return orderSent;
         case 'complate':
             const orderComplate = await prisma.orders.findMany({
+                skip: offset,
+                take: limit,
                 where: {
-                    status_payment: 'complate'
+                    status_payment: 'complate',
+                    ...isSeller
                 },
                 ...includeData
             });
             return orderComplate;
         case 'cancel':
             const orderCancel = await prisma.orders.findMany({
+                skip: offset,
+                take: limit,
                 where: {
-                    status_payment: 'cancel'
+                    status_payment: 'cancel',
+                    ...isSeller
                 },
                 ...includeData
             });
             return orderCancel;
-        default:
-            const order = await prisma.orders.findMany({
+        case 'all':
+            const orderAll = await prisma.orders.findMany({
+                skip: offset,
+                take: limit,
+                where: {
+                    ...isSeller
+                },
                 ...includeData
             });
-            return order;
+            return orderAll;
+        default:
+            // const order = await prisma.orders.findMany({
+            //     skip: offset,
+            //     take: limit,
+            //     where: {
+            //         seller_id: seller_id,
+            //     },
+            //     ...includeData
+            // });
+            return `No data for type order ${type}`;
     }
+}
+
+exports.countOrderList = async (type, seller_id, custumer_id) => {
+    let isSeller;
+
+    if(type === 'all' && seller_id!=null) {
+        isSeller = {seller_id: seller_id}
+    } else if(type === 'all' && seller_id==null) {
+        isSeller = {custumer_id: custumer_id}
+    } else if(type !== 'all' && seller_id!=null){
+        isSeller = {seller_id: seller_id}
+    } else if(type !== 'all' && seller_id==null) {
+        isSeller = {custumer_id: custumer_id}
+    }
+    switch (type) {
+        case 'paid':
+            const coundDataPaid = await prisma.orders.count({
+                where: {
+                    status_payment: 'paid',
+                    AND: {
+                        ...isSeller,
+                    }
+                }
+            })
+            return coundDataPaid;
+        case 'process':
+            const countDataProcess = await prisma.orders.count({
+                where: {
+                    status_payment: 'process',
+                    AND: {
+                        ...isSeller,
+                    }
+                }
+            })
+            return countDataProcess;
+        case 'sent':
+            const countDataSent = await prisma.orders.count({
+                where: {
+                    status_payment: 'sent',
+                    AND: {
+                        ...isSeller,
+                    }
+                }
+            })
+            return countDataSent;
+        case 'complate':
+            const countDataComplate = await prisma.orders.count({
+                where: {
+                    status_payment: 'complate',
+                    AND: {
+                        ...isSeller,
+                    }
+                }
+            })
+            return countDataComplate;
+        case 'cancel':
+            const countDataCancel = await prisma.orders.count({
+                where: {
+                    status_payment: 'cancel',
+                    AND: {
+                        ...isSeller,
+                    }
+                }
+            })
+            return countDataCancel;
+        case 'all':
+            const countDataAll = await prisma.orders.count({
+                where: {
+                    ...isSeller,
+                }
+            })
+            return countDataAll;
+        default:
+            // const countData = await prisma.orders.count({
+            //     where: {
+            //         seller_id: seller_id,
+            //     },
+            // });
+            return `No data for ${type}`;
+    }
+}
+
+exports.updateStatusOrder = async (idOrder, data) => {
+    if(data.type === 'cancel' || data.type === 'complate') {
+        const order = await prisma.orders.update({
+            where: {
+                id: idOrder,
+            },
+            data: {
+                status_payment: data.type,
+                update_at: new Date().toISOString()
+            }
+        })
+        return order;       
+    } else {
+        const order = await prisma.orders.update({
+            where: {
+                id: idOrder,
+            },
+            data: {
+                status_payment: data.type,
+            }
+        })
+        return order;
+    }
+}
+
+exports.getDetailsOrder = async (idOrder) => {
+    const order = await prisma.orders.findMany({
+        where: {
+            id: idOrder,
+        },
+        select: {
+            id: true,
+            created_at: true,
+            update_at: true,
+            transaction_id: true,
+            status_payment: true,
+            cart: {
+                select:{
+                    quantity: true,
+                    total_price: true,
+                    shipping: true,
+                    products: {
+                        select: {
+                            product_name: true,
+                            product_images: true,
+                        }
+                    }
+                }
+            },
+            checkouts:{
+                select: {
+                    name: true,
+                    phone_number: true,
+                    address: true,
+                    payments: {
+                        select: {
+                            bank_account: true,
+                            logo: true,
+                            payment_name: true,
+                        }
+                    },
+                }
+            },
+            users_orders_custumer_idTousers: {
+                select: {
+                    username: true,
+                    profiles: {
+                        select: {
+                            full_name: true,
+                            image: true,
+                            phone_num: true,
+                        }
+                    }
+                }
+            },
+            users_orders_seller_idTousers: {
+                select: {
+                    profiles: {
+                        select: {
+                            store_name: true,
+                            image: true,
+                            phone_num: true,
+                        }
+                    }
+                }
+            },
+        }
+    })
+    return order;
 }
