@@ -56,7 +56,7 @@ exports.countAllProductsModel=(searchBy,search,cb) =>{
     })
 }
 
-exports.getProductById = async (id) => {
+exports.getProductById = async (id, user_id) => {
     const product = await prisma.products.findMany({
         where: {
             id: id
@@ -64,7 +64,20 @@ exports.getProductById = async (id) => {
         include: {
             categories: true,
             reviews: true,
-            wishlist: true,
+            wishlist: {
+                where: {
+                    product_id: id,
+                    AND: {
+                        user_id: user_id,
+                        AND: {
+                            is_favorite: false
+                        }
+                    }
+                },
+                select: {
+                    is_favorite: true,
+                }
+            },
             cart: true
         }
     });

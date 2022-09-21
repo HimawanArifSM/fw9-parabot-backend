@@ -62,3 +62,82 @@ exports.createWishlist = async (data) => {
     return wishlist;
 }
 
+exports.getWishlistByProduct = async (product_id, user_id) => {
+  const wishlist = await prisma.wishlist.findMany({
+    where: {
+      product_id: product_id,
+      AND:{
+        user_id: user_id,
+      }
+    }
+  });
+  return wishlist;
+}
+
+exports.updateWishlistFavorite = async (id, is_favorite) => {
+  const wishlist = await prisma.wishlist.update({
+    where: {
+      id: id,
+    },
+    data:{
+      is_favorite: is_favorite
+    },
+  });
+  // const wishlist = await prisma.products.update({
+  //   where: {
+  //     id:{
+  //       product_id: product_id
+  //     },
+  //   }
+  // })
+  return wishlist
+}
+
+exports.getAllWishlist = async (user_id, limit, offset) => {
+  const wishlist = await prisma.wishlist.findMany({
+    skip: offset,
+    take: limit,
+    where: {
+      user_id: user_id,
+      AND: {
+        is_deleted: false
+      },
+    },
+    include: {
+      products: {
+        select: {
+          product_images: true,
+          price: true,
+          product_name: true,
+          stock: true,
+          sold: true,
+        }
+      }
+    } 
+  });
+  return wishlist;
+}
+
+exports.getCountWishlist = async (user_id) => {
+  const countData = await prisma.wishlist.count({
+    where: {
+      user_id: user_id,
+      AND: {
+        is_deleted: false,
+      }
+    }
+  });
+  return countData;
+}
+
+exports.deleteWishlist = async (id) => {
+  const wishlist = await prisma.wishlist.update({
+    where: {
+      id: id
+    },
+    data: {
+      is_deleted: true
+    }
+  });
+  return wishlist;
+}
