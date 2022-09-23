@@ -27,20 +27,47 @@ exports.updateWishlist=(req, res)=>{
   };
 
 
+// exports.createWishlist = async (req, res) => {
+//     const idUser = req.authUser.id;
+//     try {
+//         req.body.product_id = parseInt(req.body.product_id, 10);
+//         req.body.user_id = idUser;
+//         if(req.body.is_favorite == 'true'){
+//             req.body.is_favorite = true;
+//         } else {
+//             req.body.is_favorite = false;
+//         }
+//         const wishlist = await wishlistModel.createWishlist(req.body)
+//         return response(res, 'success add product to wishlist', wishlist);
+//     } catch (error) {
+//         return errorResponse(error, res);
+//     }
+// }
+
 exports.createWishlist = async (req, res) => {
     const idUser = req.authUser.id;
-    try {
-        req.body.product_id = parseInt(req.body.product_id, 10);
-        req.body.user_id = idUser;
-        if(req.body.is_favorite == 'true'){
-            req.body.is_favorite = true;
-        } else {
-            req.body.is_favorite = false;
+    const wishlist = await wishlistModel.getWishlistByProduct(parseInt(req.body.product_id, 10), idUser);
+    if(wishlist.length < 1){
+        try {
+            req.body.product_id = parseInt(req.body.product_id, 10);
+            req.body.user_id = idUser;
+            if(req.body.is_favorite == 'true'){
+                req.body.is_favorite = true;
+            } else {
+                req.body.is_favorite = false;
+            }
+            const createWishlist = await wishlistModel.createWishlist(req.body)
+            return response(res, 'success add product to wishlist', createWishlist);
+        } catch (error) {
+            return errorResponse(error, res);
         }
-        const wishlist = await wishlistModel.createWishlist(req.body)
-        return response(res, 'success add product to wishlist', wishlist);
-    } catch (error) {
-        return errorResponse(error, res);
+    } else {
+        try {
+            const recoverWish = await wishlistModel.recoverWishlist(parseInt(wishlist[0].id, 10));
+            return response(res, 'success add product to wishlist', recoverWish);
+        } catch (error) {
+            return errorResponse(error, res);
+        }
     }
 }
 
@@ -62,7 +89,7 @@ exports.getWishlistByProduct = async (req, res) => {
 
 exports.updateWishlistFavorite = async (req, res) => {
     const idUser = req.authUser.id;
-    const idProduct = parseInt(req.params.idProduct, 10);
+    const idProduct = parseInt(req.params.id, 10);
     try {
        req.body.user_id = parseInt(idUser, 10);
        req.body.product_id = parseInt(req.body.product_id, 10);
@@ -71,7 +98,7 @@ exports.updateWishlistFavorite = async (req, res) => {
        } else {
         req.body.is_favorite = false;
        }
-       const wishlist = await wishlistModel.updateWishlistFavorite(idProduct, req.body.user_id, req.body.is_favorite);
+       const wishlist = await wishlistModel.updateWishlistFavorite(idProduct, req.body.is_favorite);
        return response(res, 'success update favorite', wishlist);
     } catch (error) {
         console.log(error)
@@ -107,7 +134,7 @@ exports.deleteWishlist = async (req, res) => {
     const {id} = req.params;
     try {
         const wishlist = await wishlistModel.deleteWishlist(parseInt(id, 10));
-        return response(res, 'success get product to wishlist', wishlist);
+        return response(res, 'success delete product to wishlist', wishlist);
     } catch (error) {
         return errorResponse(error, res);
     }
