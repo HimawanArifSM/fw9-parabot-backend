@@ -99,9 +99,9 @@ exports.getAllWishlist = async (user_id, limit, offset) => {
     take: limit,
     where: {
       user_id: user_id,
-      AND: {
-        is_deleted: false
-      },
+      // AND: {
+      //   is_deleted: false
+      // },
     },
     include: {
       products: {
@@ -137,6 +137,18 @@ exports.deleteWishlist = async (id) => {
     },
     data: {
       is_deleted: true
+    }
+  });
+  return wishlist;
+}
+
+exports.recoverWishlist = async (id) => {
+  const wishlist = await prisma.wishlist.update({
+    where: {
+      id: id
+    },
+    data: {
+      is_deleted: false
     }
   });
   return wishlist;
