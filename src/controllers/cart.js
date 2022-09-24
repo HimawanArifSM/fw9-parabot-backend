@@ -106,6 +106,23 @@ exports.updateCartUser = async (req, res) => {
   }
 }
 
+exports.updateQuantityCart = async (req, res) => {
+  const {id, idProduct} = req.params;
+  try {
+    const getProduct = await productModel.getProductById(parseInt(idProduct, 10));
+    if(getProduct.length<1) { 
+      return response(res, 'error!!! product not found', null, null, 400);
+    } else {
+      const price = getProduct[0].price;
+      const data = {price: parseInt(price, 10), quantity: req.body.quantity}
+      const cart = await cartModel.updateQuantityCart(parseInt(id, 10), data);
+      return response(res, 'success update cart', cart);
+    }
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+}
+
 exports.deleteCartUser = async (req, res) => {
   const {id} = req.params;
   try {
