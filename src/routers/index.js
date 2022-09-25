@@ -26,6 +26,8 @@ router.use('/', require('./categories'));
 router.use('/', require('./wishlist'));
 router.use('/', require('./cart'));
 router.use('/', require('./order'));
+router.use('/', require('./coupon'));
+router.use('/', require('./payment'));
 
 // authenticated seller
 router.use('/authenticated-seller', require('./authenticatedSeller'));

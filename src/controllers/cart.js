@@ -96,7 +96,7 @@ exports.updateCartUser = async (req, res) => {
       return response(res, 'error!!! product not found', null, null, 400);
     } else {
       const price = getProduct[0].price;
-      const data = {price: parseInt(price, 10), quantity: req.body.quantity, coupon_id: parseInt(req.body.coupon_id, 10), shipping: req.body.shipping}
+      const data = {price: parseInt(price, 10), quantity: req.body.quantity, coupon_id: req.body.coupon_id ? parseInt(req.body.coupon_id, 10) : null, shipping: req.body.shipping}
       const cart = await cartModel.updateCartUser(parseInt(id, 10), data);
       return response(res, 'success update cart', cart);
     }

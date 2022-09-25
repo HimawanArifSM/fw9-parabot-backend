@@ -102,7 +102,7 @@ exports.updateCartUser = async (idCart, data) => {
     data: {
       quantity:  data.quantity,
       total_price: parseInt(data.quantity, 10) * data.price,
-      coupon_id: data.coupon_id ?? null,
+      coupon_id: data.coupon_id,
       shipping: data.shipping, 
     }
   })
