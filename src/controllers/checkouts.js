@@ -27,10 +27,9 @@ exports.post = async (req, res) => {
             results: checkouts
         });
     } catch (error) {
-        return res.json({
+        return res.status(400).json({
             success: false,
-            message: "Failed",
-            results: error
+            message: "Failed to created checkout."
         });
     }
 };

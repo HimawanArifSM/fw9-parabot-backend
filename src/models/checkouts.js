@@ -6,8 +6,26 @@ exports.getAllCheckouts = async () => {
 };
 
 exports.create = async (data) => {
-  const checkouts = await prisma.checkouts.create({
-    data
+  const findCheckout = await prisma.checkouts.findMany({
+    where: {
+      name: data.name,
+      OR: {
+        phone_number: data.phone_number
+      }
+    }
   });
-  return checkouts;
+  if(findCheckout.length < 1) {
+    const checkouts = await prisma.checkouts.create({
+      data
+    });
+    return checkouts;
+  } else {
+    const checkout = await prisma.checkouts.update({
+      where: {
+        id: parseInt(findCheckout[0].id)
+      },
+      data
+    });
+    return checkout;
+  }
 };
