@@ -30,6 +30,7 @@ router.use('/', require('./order'));
 // authenticated seller
 router.use('/authenticated-seller', require('./authenticatedSeller'));
 router.use('/authenticated-costumer', require('./authenticatedCustomer'));
+router.use('/',require('./review'));
 
 module.exports=router
 
