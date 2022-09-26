@@ -17,16 +17,17 @@ exports.createOrderPaid = async (req, res) => {
 }
 
 exports.getAllOrder = async (req, res) => {
-    const {type} = req.params;
+    const {type, role, id} = req.params;
     const {page=1, limit=parseInt(process.env.LIMIT_DATA, 10)} = req.query;
     const offset = (page - 1) * limit;
     const pageInfo = {};
     try {
-        const order = await orderModel.getAllOrder(type, req.body.seller_id ? parseInt(req.body.seller_id, 10) : null, req.body.custumer_id ? parseInt(req.body.custumer_id, 10) : null, limit, offset);
+        // const order = await orderModel.getAllOrder(type, req.body.seller_id ? parseInt(req.body.seller_id, 10) : null, req.body.custumer_id ? parseInt(req.body.custumer_id, 10) : null, limit, offset);
+        const order = await orderModel.getAllOrder(type, role === 'seller' ? parseInt(id, 10) : null, role === 'customer' ? parseInt(id, 10) : null, limit, offset);
         if(order.length < 1) {
             return response(res, 'Your shop not have orders list.');
         } else {
-            const countData = await orderModel.countOrderList(type, req.body.seller_id ? parseInt(req.body.seller_id, 10) : null, req.body.custumer_id ? parseInt(req.body.custumer_id, 10) : null);
+            const countData = await orderModel.countOrderList(type, role === 'seller' ? parseInt(id, 10) : null, role === 'customer' ? parseInt(id, 10) : null);
             pageInfo.totalData = countData;
             pageInfo.pages = Math.ceil(countData/limit);
             pageInfo.currentPage = parseInt(page, 10);
