@@ -30,3 +30,27 @@ exports.createReview = async (req,res) => {
         return errorResponse(err,res)
     }
 };
+
+exports.getReview = async (req, res) => {
+    const pageInfo = {};
+    try{
+        const {productId,limit=process.env.LIMIT_DATA, page=1} = req.query;
+        const offset = (page-1) * limit;
+        const results = await reviewModels.getReviewModel(parseInt(productId),parseInt(offset),parseInt(limit));
+        if(results.rowCount<1){
+            return response(res, 'No Review')
+        } else {
+            const countData = await reviewModels.getCountReview(parseInt(productId, 10));
+            pageInfo.totalData = countData;
+            pageInfo.pages = Math.ceil(countData/limit);
+            pageInfo.currentPage = parseInt(page, 10);
+            pageInfo.prevPage = pageInfo.currentPage > 1 ? pageInfo.currentPage - 1 : null;
+            pageInfo.nextPage = pageInfo.currentPage < pageInfo.pages ? pageInfo.currentPage + 1 : null;
+            return response(res,'Showing all review', results, pageInfo);
+        }
+    }
+    catch(err){
+        console.log(err);
+        return errorResponse(err,res)
+    }
+}
